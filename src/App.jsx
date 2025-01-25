@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
-
+import BlogForm from './components/BlogForm'
+import PropTypes from 'prop-types'
+import React from 'react'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -11,6 +13,7 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [newBlog, setNewBlog] = useState({title:'', author:'', url:''})
+  const [visible, setVisible] = useState(false)
 
 
   useEffect(() => {
@@ -20,18 +23,16 @@ const App = () => {
   }, [])
 
 
-  const Notification = ({ message }) => {
+  const Notification = ({message}) => {
     if (message === null) {
       return null
     }
-  
     return (
       <div className='error'>
         {message}
       </div>
     )
   }
-
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -70,6 +71,7 @@ const App = () => {
     }
   }
 
+
   const handleCreate = async (event) => {
     event.preventDefault()
     try {
@@ -88,8 +90,22 @@ const App = () => {
     }
   }
 
+  const handleDelete = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      await blogService.remove(blog.id)
+      setBlogs(blogs.filter(blogi => blogi.id !== blog.id))
+    }
+  }
 
-  const filtBlogs = blogs.filter((blog) => blog.user?.username === user?.username)
+  const updateBlog = (updatedBlog) => {
+    setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
+  }
+
+
+  const hideWhenVisible = { display: visible ? 'none' : '' }
+  const showWhenVisible = { display: visible ? '' : 'none' }
+
+  const sortedBlogs = blogs.sort((x,y) => y.likes-x.likes)
 
   if (user === null) {
     return (
@@ -100,11 +116,11 @@ const App = () => {
           <div>
             username 
               <input 
-              type="text"
-              value={username}
-              name="Username"
-              onChange={({target}) => setUsername(target.value)}
-            />
+                type="text"
+                value={username}
+                name="Username"
+                onChange={({target}) => setUsername(target.value)}
+              />
           </div>
           <div>
             password
@@ -128,42 +144,27 @@ const App = () => {
       <p>{user.name} logged in <button onClick={handleLogOut}>Logout</button></p>
 
       <h2>create new</h2>
-      <form onSubmit={handleCreate}>
-        <div>
-          title:
-            <input
-            type="text"
-            value={newBlog.title}
-            name="title"
-            onChange={({target}) => setNewBlog({...newBlog, title: target.value})}
-            />
-        </div>
-        <div>
-          author:
-          <input
-            type="text"
-            value={newBlog.author}
-            name="author"
-            onChange={({target}) => setNewBlog({...newBlog, author: target.value})}
-          />
-        </div>
-        <div>
-          url:
-          <input
-            type="text"
-            value={newBlog.url}
-            name="url"
-            onChange={({target}) => setNewBlog({...newBlog, url: target.value})}
-          />
-        </div>
-      <button type="submit">Create</button>
-      </form>
+      <div style={hideWhenVisible}>
+        <button onClick={() => setVisible(true)}>new blog</button>
+      </div>
+      <div style={showWhenVisible}>
+        <BlogForm 
+          newBlog={newBlog}
+          setNewBlog={setNewBlog}
+          handleCreate={handleCreate}
+        />
+        <button onClick={() => setVisible(false)}>cancel</button>
+      </div>
 
-      {filtBlogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+      {sortedBlogs.map(blog =>
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} handleDelete={handleDelete}/>
       )}
     </div>
   )
+}
+
+Notification.propTypes = {
+  message: PropTypes.string,
 }
 
 export default App
