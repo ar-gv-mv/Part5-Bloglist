@@ -25,8 +25,8 @@ function Blog({ blog, updateBlog, handleDelete }) {
     try {
       const updatedBlog = { ...blog, likes: blog.likes + 1 }
       const response = await blogService.update(blog.id, updatedBlog)
-      updateBlog(response)
-      setAmLike(response.likes)
+      updateBlog(updatedBlog)
+      setAmLike(updatedBlog.likes)
     } catch (error) {
       console.error("Updating fail", error)
     }
@@ -45,12 +45,15 @@ function Blog({ blog, updateBlog, handleDelete }) {
   }
 
   return (
-    <div style={blogStyle}>
-      <div>
+    <div className="Blog" style={blogStyle}>
+      <div className="Blog-Title">
         {blog.title}
         <button onClick={visibilty}>{visibleDetail ? 'Hide' : 'View'}</button>
-        <div>
-          {visibleDetail ? visible() : ''}
+        <div className="Blog-Details" style={{display: visibleDetail ? 'block' : 'none'}}>
+          <div>{blog.url}</div>
+          <div>likes {amLike} <button onClick={handleLike}>Like</button></div>
+          <div className="Blog-Author">{blog.author}</div>
+          <button onClick={() => handleDelete(blog)}>remove</button>
         </div>
       </div>
 

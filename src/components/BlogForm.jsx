@@ -2,17 +2,25 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import React from 'react'
 
-const BlogForm = ({newBlog, setNewBlog, handleCreate}) => {
+const BlogForm = ({handleCreate}) => {
+    const [newBlog, setNewBlog] = useState({title:'', author:'', url:''})
+
+    const handleSubmit = (event) => {
+      event.preventDefault()
+      handleCreate(newBlog)
+      setNewBlog({ title: '', author: '', url: '' })
+    }
 
     return (
         <div>
-          <form onSubmit={handleCreate}>
+          <form onSubmit={handleSubmit}>
             <div>
               title:
                 <input
                 type="text"
                 value={newBlog.title}
                 name="title"
+                placeholder="Title"
                 onChange={({target}) => setNewBlog({...newBlog, title: target.value})}
                 />
             </div>
@@ -22,6 +30,7 @@ const BlogForm = ({newBlog, setNewBlog, handleCreate}) => {
                 type="text"
                 value={newBlog.author}
                 name="author"
+                placeholder="Author"
                 onChange={({target}) => setNewBlog({...newBlog, author: target.value})}
               />
             </div>
@@ -31,6 +40,7 @@ const BlogForm = ({newBlog, setNewBlog, handleCreate}) => {
                 type="text"
                 value={newBlog.url}
                 name="url"
+                placeholder="URL"
                 onChange={({target}) => setNewBlog({...newBlog, url: target.value})}
               />
             </div>
