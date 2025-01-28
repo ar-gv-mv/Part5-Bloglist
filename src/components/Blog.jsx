@@ -56,7 +56,6 @@ function Blog({ blog, updateBlog, handleDelete }) {
           <button onClick={() => handleDelete(blog)}>remove</button>
         </div>
       </div>
-
     </div>
   )
 }
